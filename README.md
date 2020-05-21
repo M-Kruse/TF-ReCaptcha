@@ -15,7 +15,9 @@ Here is the command to run from my docker image
 
 `docker run --gpus all -e NVIDIA_VISIBLE_DEVICES=all -v $PWD:/tmp  -w /tmp  -u tf-user:docker  -it  --rm tf-obj-detect-api python tf_obj_api.py`
 
-# Running from TF Object Detection API Docker build - https://github.com/M-Kruse/docker-tf-obj-detection-api
+# Running from TF Object Detection API Docker build
+
+https://github.com/M-Kruse/docker-tf-obj-detection-api
 
 ```
 scooty@ScootysUbuntu:~/Code/TF-ReCaptcha$ PYTHONUNBUFFERED=0 docker run --gpus all -e NVIDIA_VISIBLE_DEVICES=all -v $PWD:/tmp  -w /tmp  -u tf-user:docker  -it  --rm tf-obj-detect-api python tf_obj_api.py
