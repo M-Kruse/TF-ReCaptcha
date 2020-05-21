@@ -10,16 +10,3 @@ I noticed a couple things about recaptcha so far:
 * Sometimes the images look like they have been fuzzed to counter NN object detection. I've heard of techniques to fool object detection while still making the image human readable and I think this is being used here
 
 Farming mode won't attempt to solve it, it will just collect the image(s) and fail it intentionally. The point is to collect as many images as possible for training.
-
-Here is the command to run from my docker image
-
-```
-docker run --gpus all \
--e NVIDIA_VISIBLE_DEVICES=all \
--v $PWD:/tmp \
--w /tmp \
--u tf-user:docker \
--it \
---rm tf-obj-detect-api python \
-tf_obj_api.py
-```
