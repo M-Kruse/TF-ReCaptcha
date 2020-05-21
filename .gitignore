@@ -1,1 +1,5 @@
 .venv
+.keras
+*.log
+imgs/*/*.png
+models/

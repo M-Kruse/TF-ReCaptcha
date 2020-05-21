@@ -50,7 +50,8 @@ class TFRecaptcha(object):
         """
         self.elements = []
         self.recaptchas = []
-
+        #Bool for determining harvesting or solving mode
+        self.harvest_mode = False
 
     """ Initalize the Firefox browser """
     def init_browser(self):
@@ -62,7 +63,9 @@ class TFRecaptcha(object):
             return False
 
     def detect_recaptcha_type(self, target_types=None):
-        
+        """
+        This tries to get the text from the ReCaptcha element to determine what class of object is requested
+        """
         try:
             raw = self.browser.page_source
             for captcha_type in self.recaptcha_types:
@@ -135,6 +138,40 @@ class TFRecaptcha(object):
         #Sauce
         recaptcha_iframe = self.browser.find_element_by_xpath("//iframe[contains(@title, 'recaptcha challenge')]")
         self.browser.switch_to.frame(recaptcha_iframe)
+        if not self.is_3x3_image_grid():
+            self.attempt_puzzle_type_bypass()
+
+    def detect_denial_of_service():
+        if self.browser.find_element_by_class_name("rc-doscaptcha-header"):
+            return True
+        else:
+            return False
+
+    def close_browser(self):
+        self.browser.close()
+
+    def click_solve_or_skip(self):
+        self.browser.find_element_by_class_name("rc-button-default").click()
+
+    def attempt_puzzle_type_bypass(self, retries=24):
+        is_3x3 = self.is_3x3_image_grid()
+        for i in range(1, retries):
+            self.click_solve_or_skip()
+            sleep(1)
+            new_type = self.is_3x3_image_grid()
+
+    def attempt_object_type_bypass(self, retries=24):
+        ret, type = self.detect_recaptcha_type()
+        if ret:
+            for i in range(1, retries):
+                self.click_solve_or_skip()
+                sleep(1)
+                new_type = self.detect_recaptcha_type()
+                if type == new_type:
+                    continue
+                else:
+                    print("[INFO] Detected new puzzle object type: {0}".format(new_type))
+                    break
 
     def generate_recaptcha_classes(self):
         """
@@ -147,31 +184,40 @@ class TFRecaptcha(object):
         else:
             grid_size = 4
         saved_img = self.download_recaptcha_img(type)
-        im =  cv2.imread(saved_img)
-        imgheight=im.shape[0]
-        imgwidth=im.shape[1]
-        y1 = 0
-        M = imgheight//grid_size
-        N = imgwidth//grid_size
-        index = -1
-        for x in range(0, imgheight, N):
-            for y in range(0, imgwidth, M):
-                index += 1
-                y1 = y + M
-                x1 = x + N
-                tiles = im[x:x+N,y:y+M,]
-                cv2.rectangle(im, (x, y), (x1, y1), (0, 0, 0))
-                file_path = "imgs/{0}/".format(type) + str(x) + '_' + str(y)+".png"
-                cv2.imwrite(file_path, tiles)
-                r = RecaptchaElement(self.elements[index], x, y, tiles, type)
-                self.recaptchas.append(r) 
-
+        if self.harvest_mode:
+            im =  cv2.imread(saved_img)
+            imgheight=im.shape[0]
+            imgwidth=im.shape[1]
+            y1 = 0
+            M = imgheight//grid_size
+            N = imgwidth//grid_size
+            index = -1
+            for x in range(0, imgheight, N):
+                for y in range(0, imgwidth, M):
+                    index += 1
+                    y1 = y + M
+                    x1 = x + N
+                    tile = im[x:x+N,y:y+M,]
+                    cv2.rectangle(im, (x, y), (x1, y1), (0, 0, 0))
+                    if self.harvest_mode:
+                        rand = ''.join([random.choice(string.ascii_letters + string.digits) for n in range(6)])
+                        file_path = "imgs/{0}/{1}.png".format(type, rand)
+                        cv2.imwrite(file_path, tile)
+                        print("Saved Img: {0}".format(file_path))
+                    r = RecaptchaElement(self.elements[index], x, y, tile, type)
+                    self.recaptchas.append(r) 
 
 if __name__ == "__main__":
     TFR = TFRecaptcha()
-    TFR.init_browser()
-    TFR.open_recaptcha()
-    TFR.generate_recaptcha_classes()
-    for i in TFR.recaptchas:
-        i.render_img()
-        i.click()
+    while True:
+        TFR.init_browser()
+        #Harvest mode just skips the solving and only saves the puzzle images
+        TFR.harvest_mode = True
+        TFR.open_recaptcha()
+        TFR.generate_recaptcha_classes()
+        TFR.close_browser()
+    # TFR.generate_recaptcha_classes()
+    # for i in TFR.recaptchas:
+    #     i.render_img()
+    #     i.click()
+
