@@ -47,8 +47,6 @@ def load_model(model_name):
 
   return model
 
-
-
 # List of the strings that is used to add correct label for each box.
 PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
 category_index = label_map_util.create_category_index_from_labelmap(PATH_TO_LABELS, use_display_name=True)
@@ -60,12 +58,6 @@ TEST_IMAGE_PATHS
 
 model_name = 'ssd_mobilenet_v1_coco_2017_11_17'
 detection_model = load_model(model_name)
-
-print(detection_model.inputs)
-
-detection_model.output_dtypes
-
-detection_model.output_shapes
 
 def run_inference_for_single_image(model, image):
   image = np.asarray(image)
@@ -102,7 +94,7 @@ def run_inference_for_single_image(model, image):
 
 
 
-def show_inference(model, image_path):
+def run_inference(model, image_path):
   # the array based representation of the image will be used later in order to prepare the
   # result image with boxes and labels on it.
   image_np = np.array(Image.open(image_path))
@@ -118,7 +110,6 @@ def show_inference(model, image_path):
       instance_masks=output_dict.get('detection_masks_reframed', None),
       use_normalized_coordinates=True,
       line_thickness=8)
-  #print(set(list(category_index.get(i) for i in output_dict['detection_classes'])))
   results = [category_index.get(value) for index,value in enumerate(output_dict['detection_classes']) if output_dict['detection_scores'][index] > 0.5]
   classes = {v['id']:v for v in results}.values()
   output = []
@@ -132,7 +123,7 @@ def show_inference(model, image_path):
   # Image.fromarray(image_np).show()
 
 for image_path in TEST_IMAGE_PATHS:
-  show_inference(detection_model, image_path)
+  run_inference(detection_model, image_path)
 
 # model_name = "mask_rcnn_inception_resnet_v2_atrous_coco_2018_01_28"
 # masking_model = load_model(model_name)
