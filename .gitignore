@@ -3,3 +3,4 @@
 *.log
 imgs/*/*/*.png
 models/
+__pycache__/
