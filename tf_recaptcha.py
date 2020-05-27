@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> 3e5733e756b03bf17c31a181957fc0792e9dde14
 from time import sleep
 import requests
 from selenium import webdriver
@@ -358,6 +364,10 @@ class TFRecaptcha(object):
     def click_random_puzzle_element(self):
       pass
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3e5733e756b03bf17c31a181957fc0792e9dde14
 #if __name__ == "__main__":
     # TFR = TFRecaptcha()
     # while True:
