@@ -1,6 +1,5 @@
 .venv
 .keras
 *.log
-imgs/*.png
-imgs/*/*.png
+imgs/*/*/*.png
 models/
