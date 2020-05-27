@@ -1,5 +1,6 @@
 .venv
 .keras
 *.log
-*.png
+imgs/*/*/*.png
 models/
+__pycache__/
