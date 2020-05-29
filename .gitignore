@@ -5,3 +5,4 @@ imgs/*/*/*.png
 models/
 __pycache__/
 *.py[cod]
+test*.py

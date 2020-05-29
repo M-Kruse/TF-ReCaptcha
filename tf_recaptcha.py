@@ -78,6 +78,7 @@ class TFRecaptcha():
         #Bool for determining harvesting or solving mode
         self.harvest_mode = False
         self.model_name = 'faster_rcnn_resnet101_coco_2018_01_28'
+        self.PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
         self.create_image_class_dirs()
         self.target_puzzle_type = "3x3"
         self.profile = webdriver.FirefoxProfile()
@@ -107,7 +108,6 @@ class TFRecaptcha():
         session = InteractiveSession(config=config)
         self.detection_model = self.load_model(self.model_name)
         # List of the strings that is used to add correct label for each box.
-        self.PATH_TO_LABELS = 'models/research/object_detection/data/mscoco_label_map.pbtxt'
         self.category_index = label_map_util.create_category_index_from_labelmap(self.PATH_TO_LABELS, use_display_name=True)
 
 
@@ -125,14 +125,16 @@ class TFRecaptcha():
         model = model.signatures['serving_default']
         return model
 
-    def run_inference_for_single_image(self, image):
+    def run_inference(self, image):
         """
         This runs inference for a given image.
         Code is hacked out of this jupyter notebook
         https://github.com/tensorflow/models/blob/master/research/object_detection/object_detection_tutorial.ipynb
         """
-        #image = np.asarray(image)
-        # The input needs to be a tensor, convert it using `tf.convert_to_tensor`.
+        # the array based representation of the image will be used later in order to prepare the
+        # result image with boxes and labels on it.
+        #image_np = np.array(Image.open(image_path))
+        # Actual detection.
         input_tensor = tf.convert_to_tensor(image)
         # The model expects a batch of images, so add an axis with `tf.newaxis`.
         input_tensor = input_tensor[tf.newaxis,...]
@@ -160,36 +162,15 @@ class TFRecaptcha():
             detection_masks_reframed = tf.cast(detection_masks_reframed > 0.5,
                                                tf.uint8)
             output_dict['detection_masks_reframed'] = detection_masks_reframed.numpy()
-
-        return output_dict
-
-    def run_inference(self, model, image_np):
-        # the array based representation of the image will be used later in order to prepare the
-        # result image with boxes and labels on it.
-        #image_np = np.array(Image.open(image_path))
-        # Actual detection.
-        output_dict = self.run_inference_for_single_image(model, image_np)
-        # Visualization of the results of a detection.
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            image_np,
-            output_dict['detection_boxes'],
-            output_dict['detection_classes'],
-            output_dict['detection_scores'],
-            self.category_index,
-            instance_masks=output_dict.get('detection_masks_reframed', None),
-            use_normalized_coordinates=True,
-            line_thickness=8)
         results = []
         for index, value in enumerate(output_dict['detection_classes']):
             if output_dict['detection_scores'][index] > 0.5:
                 results.append(self.category_index.get(value))
-        #results = [self.category_index.get(value) for index,value in enumerate(output_dict['detection_classes']) if output_dict['detection_scores'][index] > 0.5]
+        
         classes = {v['id']:v for v in results}.values()
         output = []
         for c in classes:
             output.append(c['name'])
-        #print(image_path)
-        print(output)
         return output
 
     def init_browser(self):
@@ -305,7 +286,7 @@ class TFRecaptcha():
                 print("[INFO] Attempting to bypass 4x4 puzzle type")
                 self.attempt_puzzle_type_bypass()
 
-    def detect_denial_of_service():
+    def detect_denial_of_service(self):
         """
         This is the element class that shows up if reCAPTCHA has (IP?) blocked you. Switch proxy/VPN.
         """
