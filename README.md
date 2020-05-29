@@ -4,18 +4,20 @@ This is a project to solve the ReCaptcha puzzle using Selenium and Tensorflow Ob
 
 You can interact with individual ReCaptcha puzzle elements through the RecaptchaElement class. Currently this supports clicking the element and rendering the image of the element.
 
-The 3x3 seems easier to solve, so that is the first goal.
+The 3x3 seems easier to solve, so that is the first goal. 
 
-I noticed a couple things about recaptcha so far:
+I noticed some things about recaptcha so far:
 
 * You can sometimes force recaptcha to fall back to the easiest type, the fire hydrant, if you repeatedly fail the other tests.
-* Sometimes the images look like they have been fuzzed to counter NN object detection. I've heard of techniques to fool object detection while still making the image human readable and I think this is being used here
+* Sometimes the images look like they have been fuzzed to counter NN object detection. I've heard of techniques to fool object detection while still making the image identifiable by a human and I think this is being used here
+* The number of anti-NN object detection images seems to increase the more you access the recaptcha from a single IP.
 * You can access the 3x3 as a single image, otherwise the grid elements have single image sources.
 * The 4x4 is a larger single image also with a grid overlay
+* I haven't seen any 4x4 puzzle type where the image looks like its been modified against object detection.
 
 Harvesting mode won't attempt to solve it, it will just collect the image(s) and fail it intentionally. The point is to collect as many images as possible for training.
 
-Here is an example usage, it is not trained for crosswalks but you should get the idea.
+Here is an example usage of interacting with the puzzle elements, it is not trained for crosswalks but you should get the idea.
 
 https://streamable.com/8rvkr4
 
