@@ -25,7 +25,9 @@ from object_detection.utils import ops as utils_ops
 from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 
+#http://download.tensorflow.org/models/object_detection/faster_rcnn_resnet101_coco_2018_01_28.tar.gz 
 #http://download.tensorflow.org/models/object_detection/mask_rcnn_inception_v2_coco_2018_01_28.tar.gz
+#http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v2_coco_2018_03_29.tar.gz 
 
 class RecaptchaElement():
     """docstring for RecaptchaElement"""
@@ -64,7 +66,8 @@ class TFRecaptcha():
             'motorcycle',
             'motorcycles',
             'crosswalk',
-            'crosswalks'
+            'crosswalks',
+            'unknown'
         ]
         """
         The individual recaptcha image elements will be saved in
@@ -74,7 +77,7 @@ class TFRecaptcha():
         self.recaptchas = []
         #Bool for determining harvesting or solving mode
         self.harvest_mode = False
-        self.model_name = 'mask_rcnn_inception_v2_coco_2018_01_28'
+        self.model_name = 'faster_rcnn_resnet101_coco_2018_01_28'
         self.create_image_class_dirs()
         self.target_puzzle_type = "3x3"
         self.profile = webdriver.FirefoxProfile()
@@ -83,6 +86,8 @@ class TFRecaptcha():
         """
         Creates any missing directory for the image classes.
         """
+        if not os.path.isdir("imgs"):
+            os.mkdir("imgs/")
         for object_type in self.recaptcha_types:
             try:
                 os.mkdir("imgs/{0}/".format(object_type))
